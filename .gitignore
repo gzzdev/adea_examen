@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.py[cod]
+.venv/
+resultados/
+resultados*/
+imagenes/
+tests/*.Identifier
+tests/*.jpg
+tests/*.jpeg
+tests/*.png
+tests/*.pdf
