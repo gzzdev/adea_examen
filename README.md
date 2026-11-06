@@ -47,6 +47,13 @@ PaddleOCR descarga sus modelos en la primera ejecución. El lector usa CPU con o
 python -m app.main --input ./imagenes --output ./resultados
 ```
 
+El procesamiento usa actores Ray con PaddleOCR precargado. Ajusta el número
+de actores según la memoria disponible:
+
+```bash
+python -m app.main --input ./imagenes --output ./resultados --workers 2
+```
+
 El comando escribe `registros.json` y `audit.csv`. El campo `qr_reverso` queda en `null` cuando el código no se puede leer. Cada registro también incluye `nombre_completo`, `domicilio` y `datos_electorales`. Municipio y localidad quedan en `null` cuando no aparecen con una etiqueta legible; no se infieren a partir del estado. Para guardar recortes de diagnóstico:
 
 ```bash
@@ -61,7 +68,7 @@ Levantar la base de datos de desarrollo:
 docker compose up -d mariadb
 ```
 
-El esquema inicial se crea automáticamente en el primer arranque y define las tablas `expediente` y `log_auditoria`. Para habilitar la conexión desde la aplicación, configurar en `.env`:
+El esquema inicial se crea automáticamente en el primer arranque y define las tablas `expediente` y `log_auditoria`. Cada archivo se identifica mediante SHA-256; si la misma imagen ya existe, se registra como `DUPLICADO` y no se vuelve a ejecutar el OCR. Para habilitar la conexión desde la aplicación, configurar en `.env`:
 
 ```dotenv
 DB_ENABLED=true
@@ -77,4 +84,18 @@ El volumen `mariadb_data` conserva la base entre reinicios. Los scripts de
 primera vez; los cambios posteriores deben agregarse como nuevas migraciones.
 
 Cuando `DB_ENABLED=false`, la auditoría se conserva en `audit.csv`; cuando se
-activa, se escribe en `log_auditoria` de MariaDB.
+activa, cada resultado y su evento se escriben en `expediente` y
+`log_auditoria` de MariaDB.
+
+## Tablero web
+
+Con MariaDB activa y las variables `DB_*` configuradas, iniciar la interfaz de
+consulta con:
+
+```bash
+flask --app app.web run --host 0.0.0.0 --port 8000
+```
+
+Abrir `http://localhost:8000`. El tablero muestra un resumen, los expedientes y
+la tabla de auditoría. Incluye búsqueda, filtro por estado, paginación y una
+vista de detalle para los datos extraídos. La interfaz es de solo lectura.

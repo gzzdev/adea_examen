@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS expediente (
     iniciado_en DATETIME(6) NULL,
     terminado_en DATETIME(6) NULL,
     PRIMARY KEY (id),
-    UNIQUE KEY uq_expediente_lote_hash (lote_id, hash_archivo),
+    UNIQUE KEY uq_expediente_hash (hash_archivo),
     KEY ix_expediente_lote_estado (lote_id, estado),
     KEY ix_expediente_hash (hash_archivo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
