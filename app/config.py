@@ -9,10 +9,9 @@ load_dotenv()
 @dataclass(frozen=True)
 class Settings:
     ocr_lang: str = os.getenv("OCR_LANG", "en")
-    oracle_enabled: bool = os.getenv("ORACLE_ENABLED", "false").lower() == "true"
-    oracle_user: str = os.getenv("ORACLE_USER", "")
-    oracle_password: str = os.getenv("ORACLE_PASSWORD", "")
-    oracle_dsn: str = os.getenv("ORACLE_DSN", "")
-    oracle_procedure: str = os.getenv("ORACLE_PROCEDURE", "SP_REGISTRAR_EXPEDIENTE")
-    sqlserver_enabled: bool = os.getenv("SQLSERVER_ENABLED", "false").lower() == "true"
-    sqlserver_connection_string: str = os.getenv("SQLSERVER_CONNECTION_STRING", "")
+    db_enabled: bool = os.getenv("DB_ENABLED", "false").lower() == "true"
+    db_host: str = os.getenv("DB_HOST", "127.0.0.1")
+    db_port: int = int(os.getenv("DB_PORT", "3306"))
+    db_database: str = os.getenv("DB_DATABASE", "adea")
+    db_user: str = os.getenv("DB_USER", "adea")
+    db_password: str = os.getenv("DB_PASSWORD", "")

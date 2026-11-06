@@ -1,6 +1,6 @@
 # INE Extractor
 
-CLI para procesar imágenes de credenciales INE. Usa PaddleOCR para leer CURP y clave de elector, `zxing-cpp` para el QR del reverso y genera un registro JSON con auditoría CSV. Las conexiones a Oracle y SQL Server son opcionales.
+CLI para procesar imágenes de credenciales INE. Usa PaddleOCR para leer CURP y clave de elector, `zxing-cpp` para el QR del reverso y genera un registro JSON con auditoría CSV o MariaDB.
 
 ## Estructura
 
@@ -21,6 +21,7 @@ app/
   parsing/
     curp.py                   Validación y extracción de CURP
     clave_elector.py          Extracción de clave de elector
+    ine_fields.py             Nombre, domicilio y datos electorales
     catalogs.py               Catálogos de validación
   models/
     results.py                Resultado de extracción
@@ -46,13 +47,34 @@ PaddleOCR descarga sus modelos en la primera ejecución. El lector usa CPU con o
 python -m app.main --input ./imagenes --output ./resultados
 ```
 
-El comando escribe `registros.json` y `audit.csv`. El campo `qr_reverso` queda en `null` cuando el código no se puede leer. Para guardar recortes de diagnóstico:
+El comando escribe `registros.json` y `audit.csv`. El campo `qr_reverso` queda en `null` cuando el código no se puede leer. Cada registro también incluye `nombre_completo`, `domicilio` y `datos_electorales`. Municipio y localidad quedan en `null` cuando no aparecen con una etiqueta legible; no se infieren a partir del estado. Para guardar recortes de diagnóstico:
 
 ```bash
 python -m app.main --input ./imagenes --output ./resultados --save-debug-images
 ```
 
-## Persistencia opcional
+## Persistencia con MariaDB
 
-Por defecto se escribe la auditoría en CSV y no se conecta a ninguna base.
-Configurando `.env` y activando `ORACLE_ENABLED` o `SQLSERVER_ENABLED` se habilita la persistencia por base de datos. En ese caso instalar también `oracledb` o `pyodbc` según corresponda.
+Levantar la base de datos de desarrollo:
+
+```bash
+docker compose up -d mariadb
+```
+
+El esquema inicial se crea automáticamente en el primer arranque y define las tablas `expediente` y `log_auditoria`. Para habilitar la conexión desde la aplicación, configurar en `.env`:
+
+```dotenv
+DB_ENABLED=true
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=adea
+DB_USER=adea
+DB_PASSWORD=adea_dev_password
+```
+
+El volumen `mariadb_data` conserva la base entre reinicios. Los scripts de
+`db/init` solo se ejecutan automáticamente cuando el volumen se crea por
+primera vez; los cambios posteriores deben agregarse como nuevas migraciones.
+
+Cuando `DB_ENABLED=false`, la auditoría se conserva en `audit.csv`; cuando se
+activa, se escribe en `log_auditoria` de MariaDB.

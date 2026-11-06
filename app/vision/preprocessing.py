@@ -10,6 +10,8 @@ SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png"}
 
 
 def discover_images(input_dir: Path) -> list[Path]:
+    if input_dir.is_file():
+        return [input_dir] if input_dir.suffix.lower() in SUPPORTED_EXTENSIONS else []
     return sorted(path for path in input_dir.rglob("*")
                   if path.is_file() and path.suffix.lower() in SUPPORTED_EXTENSIONS)
 

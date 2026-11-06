@@ -1,4 +1,5 @@
 import csv
+import uuid
 from datetime import datetime, timezone
 
 
@@ -15,31 +16,29 @@ class FileAuditRepository:
             ])
 
 
-class SqlServerAuditRepository:
-    def __init__(self, connection_string: str):
-        import pyodbc
-        self.connection = pyodbc.connect(connection_string)
+class MariaDbAuditRepository:
+    """Auditoría de ejecución; la conexión se mantiene por proceso CLI."""
+
+    def __init__(self, *, host: str, port: int, database: str, user: str, password: str):
+        import pymysql
+        self.connection = pymysql.connect(
+            host=host,
+            port=port,
+            database=database,
+            user=user,
+            password=password,
+            charset="utf8mb4",
+            autocommit=False,
+        )
+        self.batch_id = str(uuid.uuid4())
 
     def record(self, *, filename: str, status: str, message: str = "") -> None:
-        cursor = self.connection.cursor()
-        cursor.execute(
+        with self.connection.cursor() as cursor:
+            cursor.execute(
             """
-            INSERT INTO auditoria_expedientes
-                (archivo, estado, mensaje, fecha_proceso)
-            VALUES (?, ?, ?, SYSUTCDATETIME())
+            INSERT INTO log_auditoria (lote_id, archivo, estado, mensaje)
+            VALUES (%s, %s, %s, %s)
             """,
-            filename, status, message,
-        )
-        self.connection.commit()
-
-
-class OracleExpedienteRepository:
-    def __init__(self, user: str, password: str, dsn: str, procedure: str):
-        import oracledb
-        self.connection = oracledb.connect(user=user, password=password, dsn=dsn)
-        self.procedure = procedure
-
-    def save(self, *, filename: str, curp: str, clave_elector: str) -> None:
-        cursor = self.connection.cursor()
-        cursor.callproc(self.procedure, [filename, curp, clave_elector])
+                (self.batch_id, filename, status, message),
+            )
         self.connection.commit()

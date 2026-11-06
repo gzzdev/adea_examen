@@ -1,0 +1,23 @@
+services:
+  mariadb:
+    image: mariadb:11.4
+    container_name: adea-mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE:-adea}
+      MARIADB_USER: ${DB_USER:-adea}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-adea_dev_password}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_dev_password}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mariadb_data:

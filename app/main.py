@@ -7,8 +7,7 @@ from app.ocr.paddle_engine import create_reader
 from app.services.extraction_service import extract_image
 from app.services.repositories import (
     FileAuditRepository,
-    OracleExpedienteRepository,
-    SqlServerAuditRepository,
+    MariaDbAuditRepository,
 )
 from app.vision.preprocessing import discover_images
 
@@ -24,11 +23,13 @@ def main() -> None:
 
     settings = Settings()
     args.output.mkdir(parents=True, exist_ok=True)
-    audit = (SqlServerAuditRepository(settings.sqlserver_connection_string)
-             if settings.sqlserver_enabled else FileAuditRepository(args.output / "audit.csv"))
-    oracle = (OracleExpedienteRepository(settings.oracle_user, settings.oracle_password,
-                                        settings.oracle_dsn, settings.oracle_procedure)
-              if settings.oracle_enabled else None)
+    audit = (MariaDbAuditRepository(
+                 host=settings.db_host,
+                 port=settings.db_port,
+                 database=settings.db_database,
+                 user=settings.db_user,
+                 password=settings.db_password,
+             ) if settings.db_enabled else FileAuditRepository(args.output / "audit.csv"))
     reader = create_reader(settings.ocr_lang)
 
     records = []
@@ -47,13 +48,13 @@ def main() -> None:
                 "curp": result.curp,
                 "clave_elector": result.clave_elector,
                 "qr_reverso": result.qr_reverso,
+                "nombre_completo": result.nombre_completo,
+                "domicilio": result.domicilio,
+                "datos_electorales": result.datos_electorales,
                 "estado": status,
             })
             audit.record(filename=path.name, status=status,
                          message="QR reverso leído" if result.qr_reverso else "QR reverso no detectado")
-            if oracle and status == "PROCESADO":
-                oracle.save(filename=path.name, curp=result.curp,
-                            clave_elector=result.clave_elector)
         except Exception as exc:
             audit.record(filename=path.name, status="ERROR", message=str(exc))
 
