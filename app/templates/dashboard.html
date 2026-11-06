@@ -31,7 +31,10 @@
       <section class="content">
         <div class="intro">
           <div><h2>Resumen de procesamiento</h2><p>Consulta el estado de las credenciales procesadas y su trazabilidad.</p></div>
-          <button class="refresh-button" id="refresh-button" type="button"><span aria-hidden="true">↻</span> Actualizar</button>
+          <div class="refresh-actions">
+            <span class="sync-status" id="sync-status" role="status"><span></span> Actualización automática cada 5 s</span>
+            <button class="refresh-button" id="refresh-button" type="button"><span aria-hidden="true">↻</span> Actualizar</button>
+          </div>
         </div>
 
         <div class="alert hidden" id="connection-alert" role="alert"></div>
@@ -50,7 +53,7 @@
           <div class="toolbar">
             <label class="search-field"><span aria-hidden="true">⌕</span><span class="sr-only">Buscar</span><input id="search-input" type="search" placeholder="Buscar por archivo, CURP o identificador…" autocomplete="off"></label>
             <label class="filter-field"><span class="sr-only">Filtrar por estado</span><select id="status-filter">
-              <option value="">Todos los estados</option><option value="PROCESADO">Procesado</option><option value="PENDIENTE_VALIDACION">Por validar</option><option value="INVALIDO">Inválido</option><option value="ERROR">Error</option><option value="DUPLICADO" data-audit-only>Duplicado</option>
+              <option value="">Todos los estados</option><option value="PROCESADO">Procesado</option><option value="PENDIENTE_VALIDACION">Por validar</option><option value="INVALIDO">Inválido</option><option value="ERROR">Error</option><option value="INICIADO" data-audit-only>Iniciado</option><option value="DUPLICADO" data-audit-only>Duplicado</option>
             </select></label>
           </div>
 

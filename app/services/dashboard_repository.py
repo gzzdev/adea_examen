@@ -82,7 +82,7 @@ class DashboardRepository:
             wildcard = f"%{search}%"
             clauses.append("(archivo LIKE %s OR mensaje LIKE %s OR expediente_id LIKE %s)")
             params.extend([wildcard, wildcard, wildcard])
-        if status and status in ALLOWED_EXPEDIENTE_STATES | {"DUPLICADO"}:
+        if status and status in ALLOWED_EXPEDIENTE_STATES | {"INICIADO", "DUPLICADO"}:
             clauses.append("estado = %s")
             params.append(status)
         where = f"WHERE {' AND '.join(clauses)}" if clauses else ""

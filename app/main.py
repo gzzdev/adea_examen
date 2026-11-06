@@ -39,6 +39,11 @@ def main() -> None:
                     message=f"Imagen ya recibida como {previous['archivo']} ({previous['estado']})",
                 )
                 continue
+        repository.record(
+            filename=path.name,
+            status="INICIADO",
+            message="Imagen válida y no duplicada; procesamiento OCR iniciado",
+        )
         pending.append((path, file_hash))
 
     results = process_batch(

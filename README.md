@@ -87,6 +87,15 @@ Cuando `DB_ENABLED=false`, la auditoría se conserva en `audit.csv`; cuando se
 activa, cada resultado y su evento se escriben en `expediente` y
 `log_auditoria` de MariaDB.
 
+Para limpiar los datos de desarrollo sin eliminar las tablas:
+
+```bash
+python scripts/clean_db.py --yes
+```
+
+El parámetro `--yes` es obligatorio porque la operación elimina todos los
+expedientes y registros de auditoría.
+
 ## Tablero web
 
 Con MariaDB activa y las variables `DB_*` configuradas, iniciar la interfaz de
@@ -99,3 +108,5 @@ flask --app app.web run --host 0.0.0.0 --port 8000
 Abrir `http://localhost:8000`. El tablero muestra un resumen, los expedientes y
 la tabla de auditoría. Incluye búsqueda, filtro por estado, paginación y una
 vista de detalle para los datos extraídos. La interfaz es de solo lectura.
+Cada imagen nueva registra un evento `INICIADO` antes de enviarse a Ray y un
+segundo evento con el resultado final del procesamiento.
