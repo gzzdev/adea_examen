@@ -2,11 +2,10 @@
 
 import re
 import cv2
+from paddleocr import PaddleOCR
 
 
 def create_reader(language: str):
-    from paddleocr import PaddleOCR
-
     language = {"eng": "en", "spa": "es"}.get(language.lower(), language.lower())
     return PaddleOCR(
         lang=language,
